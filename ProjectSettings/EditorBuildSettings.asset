@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Menu.unity
+    guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/Man.unity
+    guid: eee9be1f4bcee5143858b3a5acfb721e
+  - enabled: 1
+    path: Assets/Scenes/Woman.unity
+    guid: 9e45cec2815817d47ae1ee79247fa249
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel1.unity
+    guid: 5b360ff298268dd489ae66348e447533
+  - enabled: 1
+    path: Assets/Scenes/Gallery.unity
+    guid: e92029e5c9b330346b109c371e1600ee
+  - enabled: 1
+    path: Assets/Scenes/Color/Coloring_Level_1.unity
+    guid: 32da1af5146f45a4396fa10d4abd9be2
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel2.unity
+    guid: 489d265922838e34191a22f2baaffcaf
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel3.unity
+    guid: 54321a9d97c555c468f3a736262a185f
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel4.unity
+    guid: d179e0cf5f38e4148bfbbbfb6ff7c7d3
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel5.unity
+    guid: b39c51aa8cff20e47a62a1e088cc1d2b
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel6.unity
+    guid: dc2f1c4483b1f754ab5365022b3faa69
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel7.unity
+    guid: 0ad98b776c0203b47841208bdded8219
+  - enabled: 1
+    path: Assets/Scenes/Battle/BattleLevel8.unity
+    guid: a0340dd04845e1d4aba0718ace7a6f92
+  - enabled: 1
+    path: Assets/Scenes/Color/Coloring_Level_2.unity
+    guid: ee789428d4ac05d45b9f40da1e0a765e
+  - enabled: 1
+    path: Assets/Scenes/Tutorial.unity
+    guid: eacccca1cb284b546885f5211755559a
+  - enabled: 1
+    path: Assets/Scenes/Color/Coloring_Level_3.unity
+    guid: 0e6b06f1603ac6f4ebca80f3e0ce7357
+  - enabled: 1
+    path: Assets/Scenes/Color/Coloring_Level_4.unity
+    guid: 170e5f1e3c17f2840b015f3d82e76dbe
+  - enabled: 0
+    path: Assets/Scenes/Color/Coloring_Level_5.unity
+    guid: 6e177f5943697244eb1825ada3561ce9
+  - enabled: 0
+    path: Assets/Scenes/Color/Coloring_Level_6.unity
+    guid: 2f0935b0ba013ef48a57509ff299a6dc
+  - enabled: 0
+    path: Assets/Scenes/Color/Coloring_Level_7.unity
+    guid: ae9b891bddb2b214eafd3219e032bfaf
+  - enabled: 0
+    path: Assets/Scenes/Color/Coloring_Level_8.unity
+    guid: 257fa5608fe393146af5d7dc4503eee3
+  m_configObjects: {}
