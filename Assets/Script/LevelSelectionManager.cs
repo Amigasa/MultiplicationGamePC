@@ -32,6 +32,16 @@ public class LevelSelectionManager : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        // ===== ПК УПРАВЛЕНИЕ =====
+        // Escape - выход в меню
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            BackToMenu();
+        }
+    }
+
     void UpdateLevelDisplay(int levelIndex)
     {
         LevelInfo level = levels[levelIndex];

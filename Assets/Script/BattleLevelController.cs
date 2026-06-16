@@ -59,18 +59,13 @@ public class BattleLevelController : MonoBehaviour
 
     void Start()
     {
-        // Динамическое определение levelId
         levelId = GetCurrentLevelId();
-
-        // Инициализация системы сложности
         questionGenerator = new SmartQuestionGenerator();
         adaptiveDifficulty = new AdaptiveDifficulty();
 
-        // Находим ProgressiveLevelManager если не установлен в Inspector
         if (difficultyManager == null)
             difficultyManager = FindObjectOfType<ProgressiveLevelManager>();
 
-        // Воспроизводим музыку для битвы
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayBattleGameMusic();
@@ -78,7 +73,6 @@ public class BattleLevelController : MonoBehaviour
 
         GenerateQuestion();
         UpdateHearts();
-
         Debug.Log($"Загружен уровень: {levelId}");
     }
 
@@ -88,6 +82,40 @@ public class BattleLevelController : MonoBehaviour
         {
             UpdateTimer();
         }
+
+        // ===== ПК УПРАВЛЕНИЕ =====
+        // Клавиши 1-4 для ответов
+        if (Input.GetKeyDown(KeyCode.Alpha1) && answerButtons.Length > 0 && answerButtons[0].interactable)
+            answerButtons[0].onClick.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha2) && answerButtons.Length > 1 && answerButtons[1].interactable)
+            answerButtons[1].onClick.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha3) && answerButtons.Length > 2 && answerButtons[2].interactable)
+            answerButtons[2].onClick.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha4) && answerButtons.Length > 3 && answerButtons[3].interactable)
+            answerButtons[3].onClick.Invoke();
+
+        // R - рестарт
+        if (Input.GetKeyDown(KeyCode.R))
+            RestartLevel();
+
+        // Escape - выход в меню
+        if (Input.GetKeyDown(KeyCode.Escape))
+            BackToMenu();
+
+        // Space - продолжить
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (victoryPanel.activeSelf)
+            {
+                Button nextBtn = victoryPanel.GetComponentInChildren<Button>();
+                if (nextBtn != null) nextBtn.onClick.Invoke();
+            }
+            else if (defeatPanel.activeSelf)
+            {
+                Button restartBtn = defeatPanel.GetComponentInChildren<Button>();
+                if (restartBtn != null) restartBtn.onClick.Invoke();
+            }
+        }
     }
 
     void UpdateTimer()
@@ -96,18 +124,15 @@ public class BattleLevelController : MonoBehaviour
         {
             timeRemaining -= Time.deltaTime;
 
-            // Обновляем текст
             if (timerText != null)
                 timerText.text = Mathf.CeilToInt(timeRemaining).ToString();
 
-            // Обновляем слайдер
             if (timerSlider != null)
             {
                 float totalTime = GetTimeLimitForCurrentLevel();
                 float fillAmount = timeRemaining / totalTime;
                 timerSlider.value = fillAmount;
 
-                // Меняем цвет в зависимости от времени
                 if (timerFillImage != null)
                 {
                     if (fillAmount < 0.3f)
@@ -121,7 +146,6 @@ public class BattleLevelController : MonoBehaviour
         }
         else
         {
-            // Время вышло
             TimeOut();
         }
     }
@@ -134,13 +158,11 @@ public class BattleLevelController : MonoBehaviour
         correctCombo = 0;
         playerHealth--;
 
-        // Записываем ошибку
         string question = questionText.text;
         int num1 = int.Parse(question.Split('×')[0].Trim());
         int num2 = int.Parse(question.Split('×')[1].Split('=')[0].Trim());
         adaptiveDifficulty.RecordMistake(num1, num2);
 
-        // Звук при потере времени
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySFX("BattleWrongAnswer");
@@ -149,7 +171,6 @@ public class BattleLevelController : MonoBehaviour
 
         UpdateHearts();
         currentQuestion++;
-
         ShowBonusEffect("Время вышло! -1 здоровье");
 
         if (playerHealth <= 0)
@@ -174,13 +195,12 @@ public class BattleLevelController : MonoBehaviour
     float GetTimeLimitForCurrentLevel()
     {
         DifficultySettings difficulty = difficultyManager.GetDifficultyForLevel(levelId);
-        return difficulty.timeBonusThreshold * 2f; // Даем в 2 раза больше времени чем порог бонуса
+        return difficulty.timeBonusThreshold * 2f;
     }
 
     string GetCurrentLevelId()
     {
         string sceneName = SceneManager.GetActiveScene().name;
-
         if (sceneName.Contains("1")) return "Battle_Level_1";
         else if (sceneName.Contains("2")) return "Battle_Level_2";
         else if (sceneName.Contains("3")) return "Battle_Level_3";
@@ -196,38 +216,30 @@ public class BattleLevelController : MonoBehaviour
     {
         if (!isGameActive) return;
 
-        // Получаем настройки сложности для текущего уровня
         DifficultySettings difficulty = difficultyManager.GetDifficultyForLevel(levelId);
         totalQuestions = difficulty.totalQuestions;
         int[] weakNumbers = adaptiveDifficulty.GetWeakNumbers();
 
-        // Генерируем вопрос
         QuestionData question = questionGenerator.GenerateQuestion(difficulty, weakNumbers);
 
         questionText.text = $"{question.number1} × {question.number2} = ?";
         correctAnswer = question.correctAnswer;
         questionStartTime = Time.time;
 
-        // Запускаем таймер
         timeRemaining = GetTimeLimitForCurrentLevel();
         isTimerRunning = true;
 
-        // Сбрасываем слайдер и цвет
         if (timerSlider != null)
             timerSlider.value = 1f;
-
         if (timerFillImage != null)
             timerFillImage.color = Color.green;
-
         if (timerText != null)
             timerText.color = Color.white;
 
-        // Создаем массив ответов
         int[] answers = new int[4];
         int correctIndex = Random.Range(0, 4);
         answers[correctIndex] = correctAnswer;
 
-        // Заполняем неправильные ответы
         int wrongIndex = 0;
         for (int i = 0; i < 4; i++)
         {
@@ -249,48 +261,36 @@ public class BattleLevelController : MonoBehaviour
     {
         if (!isGameActive || !isTimerRunning) return;
 
-        // Останавливаем таймер
         isTimerRunning = false;
 
-        // Получаем настройки для определения порога бонуса
         DifficultySettings difficulty = difficultyManager.GetDifficultyForLevel(levelId);
         float reactionTime = Time.time - questionStartTime;
         bool isFast = reactionTime < difficulty.timeBonusThreshold;
 
         if (selectedAnswer == correctAnswer)
         {
-            // Правильный ответ
             correctCombo++;
             enemyHealth--;
 
-            // Звуки правильного ответа
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX("BattleCorrectAnswer");
                 AudioManager.Instance.PlaySFX("PlayerAttack");
                 AudioManager.Instance.PlaySFX("EnemyDamage");
-
-                // Дополнительный звук за быстрый ответ
                 if (isFast)
-                {
                     AudioManager.Instance.PlaySFX("StarAppear");
-                }
             }
 
             if (isFast)
-            {
                 ShowBonusEffect($"Быстро! ({reactionTime:F1}с)");
-            }
 
             StartCoroutine(AttackEnemy());
         }
         else
         {
-            // Неправильный ответ
             correctCombo = 0;
             playerHealth--;
 
-            // Звуки неправильного ответа
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX("BattleWrongAnswer");
@@ -298,7 +298,6 @@ public class BattleLevelController : MonoBehaviour
                 AudioManager.Instance.PlaySFX("PlayerDamage");
             }
 
-            // Записываем ошибку для адаптивной сложности
             string question = questionText.text;
             int num1 = int.Parse(question.Split('×')[0].Trim());
             int num2 = int.Parse(question.Split('×')[1].Split('=')[0].Trim());
@@ -340,13 +339,9 @@ public class BattleLevelController : MonoBehaviour
     {
         Vector2 originalPos = playerImage.rectTransform.anchoredPosition;
         playerImage.rectTransform.anchoredPosition = originalPos + new Vector2(50f, 0);
-
         yield return new WaitForSeconds(0.3f);
-
         enemyImage.color = Color.red;
-
         yield return new WaitForSeconds(0.2f);
-
         playerImage.rectTransform.anchoredPosition = originalPos;
         enemyImage.color = Color.white;
     }
@@ -355,13 +350,9 @@ public class BattleLevelController : MonoBehaviour
     {
         Vector2 originalPos = enemyImage.rectTransform.anchoredPosition;
         enemyImage.rectTransform.anchoredPosition = originalPos + new Vector2(-50f, 0);
-
         yield return new WaitForSeconds(0.3f);
-
         playerImage.color = Color.red;
-
         yield return new WaitForSeconds(0.2f);
-
         enemyImage.rectTransform.anchoredPosition = originalPos;
         playerImage.color = Color.white;
     }
@@ -382,12 +373,8 @@ public class BattleLevelController : MonoBehaviour
             {
                 victoryStars[i].SetActive(true);
                 victoryStars[i].transform.localScale = Vector3.zero;
-
-                // Звук появления звезды
                 if (AudioManager.Instance != null)
-                {
                     AudioManager.Instance.PlaySFX("StarAppear");
-                }
 
                 float duration = 0.5f;
                 float elapsed = 0f;
@@ -401,12 +388,8 @@ public class BattleLevelController : MonoBehaviour
             }
             yield return new WaitForSeconds(0.2f);
         }
-
-        // Звук завершения уровня после анимации звезд
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlaySFX("LevelComplete");
-        }
     }
 
     void Victory()
@@ -416,11 +399,8 @@ public class BattleLevelController : MonoBehaviour
         starsEarned = CalculateStars();
         SaveLevelProgress(levelId, starsEarned);
 
-        // Музыка победы
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayVictoryMusic();
-        }
 
         StartCoroutine(AnimateStars());
 
@@ -447,13 +427,8 @@ public class BattleLevelController : MonoBehaviour
     {
         isGameActive = false;
         isTimerRunning = false;
-
-        // Музыка поражения
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayDefeatMusic();
-        }
-
         defeatPanel.SetActive(true);
     }
 
@@ -464,11 +439,8 @@ public class BattleLevelController : MonoBehaviour
         starsEarned = 1;
         SaveLevelProgress(levelId, starsEarned);
 
-        // Нейтральная музыка для ничьей
         if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayDefeatMusic(); // Или создайте отдельный звук для ничьей
-        }
+            AudioManager.Instance.PlayDefeatMusic();
 
         StartCoroutine(AnimateStars());
 
@@ -481,8 +453,6 @@ public class BattleLevelController : MonoBehaviour
     void ShowBonusEffect(string message)
     {
         Debug.Log(message);
-
-        // Показываем текст бонуса
         if (bonusText != null)
         {
             bonusText.text = message;
@@ -500,38 +470,27 @@ public class BattleLevelController : MonoBehaviour
 
     public void RestartLevel()
     {
-        // Звук кнопки перезапуска
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void BackToMenu()
     {
-        // Звук кнопки возврата
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
         SceneManager.LoadScene(1);
     }
 
-    // Дополнительные методы для управления звуками
     public void PlayButtonSound()
     {
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
     }
 
     public void PlayHoverSound()
     {
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonHover();
-        }
     }
 }

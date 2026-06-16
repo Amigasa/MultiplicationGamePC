@@ -38,7 +38,6 @@ public class ColoringController : MonoBehaviour
     private AdaptiveDifficulty adaptiveDifficulty = new AdaptiveDifficulty();
     private DifficultySettings currentDifficultySettings;
 
-    // ЗАЩИТА ОТ ЗАВИСАНИЙ
     private bool isProcessingAnswer = false;
     private Coroutine currentAnimationCoroutine;
 
@@ -49,13 +48,9 @@ public class ColoringController : MonoBehaviour
             levelId = "Coloring_Level_1";
         }
 
-        // Получаем настройки сложности из ProgressiveLevelManager
         currentDifficultySettings = progressiveLevelManager.GetDifficultyForLevel(levelId);
-
-        // Определяем текущий уровень сложности на основе levelId
         currentDifficultyLevel = progressiveLevelManager.ExtractLevelNumber(levelId) - 1;
 
-        // Воспроизводим музыку для режима раскраски
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayColoringGameMusic();
@@ -66,6 +61,43 @@ public class ColoringController : MonoBehaviour
         GenerateQuestion();
 
         Debug.Log($"Загружен уровень раскраски: {levelId}, Уровень сложности: {currentDifficultyLevel + 1}");
+    }
+
+    void Update()
+    {
+        // ===== ПК УПРАВЛЕНИЕ =====
+        // Клавиши 1-4 для ответов
+        if (Input.GetKeyDown(KeyCode.Alpha1) && answerButtons.Length > 0 && answerButtons[0].interactable)
+            answerButtons[0].onClick.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha2) && answerButtons.Length > 1 && answerButtons[1].interactable)
+            answerButtons[1].onClick.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha3) && answerButtons.Length > 2 && answerButtons[2].interactable)
+            answerButtons[2].onClick.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha4) && answerButtons.Length > 3 && answerButtons[3].interactable)
+            answerButtons[3].onClick.Invoke();
+
+        // R - рестарт
+        if (Input.GetKeyDown(KeyCode.R))
+            RestartLevel();
+
+        // Escape - выход в меню
+        if (Input.GetKeyDown(KeyCode.Escape))
+            BackToMenu();
+
+        // Space - продолжить
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (victoryPanel.activeSelf)
+            {
+                Button nextBtn = victoryPanel.GetComponentInChildren<Button>();
+                if (nextBtn != null) nextBtn.onClick.Invoke();
+            }
+            else if (defeatPanel.activeSelf)
+            {
+                Button restartBtn = defeatPanel.GetComponentInChildren<Button>();
+                if (restartBtn != null) restartBtn.onClick.Invoke();
+            }
+        }
     }
 
     void InitializeDrawing()
@@ -102,7 +134,7 @@ public class ColoringController : MonoBehaviour
         {
             case 0: case 1: return Color.green;
             case 2: case 3: return Color.yellow;
-            case 4: case 5: return new Color(1f, 0.5f, 0f); // оранжевый
+            case 4: case 5: return new Color(1f, 0.5f, 0f);
             case 6: return Color.red;
             case 7: return Color.magenta;
             default: return Color.white;
@@ -115,19 +147,16 @@ public class ColoringController : MonoBehaviour
 
         int number1, number2;
 
-        // Используем адаптивную сложность: иногда показываем слабые числа
         int[] weakNumbers = adaptiveDifficulty.GetWeakNumbers();
         bool useWeakNumber = weakNumbers.Length > 0 && Random.Range(0f, 1f) > 0.7f;
 
         if (useWeakNumber && weakNumbers.Length > 0)
         {
-            // Используем одно из слабых чисел
             number1 = weakNumbers[Random.Range(0, weakNumbers.Length)];
             number2 = Random.Range(currentDifficultySettings.minNumber, currentDifficultySettings.maxNumber + 1);
         }
         else
         {
-            // Обычная генерация чисел
             number1 = Random.Range(currentDifficultySettings.minNumber, currentDifficultySettings.maxNumber + 1);
             number2 = Random.Range(currentDifficultySettings.minNumber, currentDifficultySettings.maxNumber + 1);
         }
@@ -166,18 +195,16 @@ public class ColoringController : MonoBehaviour
     {
         int wrongAnswer;
         int attempts = 0;
-        int maxAttempts = 15; // ЗАЩИТА ОТ БЕСКОНЕЧНОГО ЦИКЛА
+        int maxAttempts = 15;
 
         do
         {
             if (currentDifficultySettings.useTrickyAnswers && attempts < 3)
             {
-                // Генерируем "хитрые" неправильные ответы
                 wrongAnswer = GenerateTrickyAnswer();
             }
             else
             {
-                // Обычные неправильные ответы
                 int variation = Random.Range(-currentDifficultySettings.wrongAnswerRange,
                                            currentDifficultySettings.wrongAnswerRange + 1);
                 wrongAnswer = correctAnswer + variation;
@@ -187,7 +214,6 @@ public class ColoringController : MonoBehaviour
 
             if (attempts > maxAttempts)
             {
-                // АВАРИЙНЫЙ ВЫХОД ИЗ ЦИКЛА
                 wrongAnswer = correctAnswer + (currentIndex + 1) * (currentIndex % 2 == 0 ? 1 : -1);
                 Debug.LogWarning($"Превышено количество попыток генерации неправильного ответа. Использовано аварийное значение: {wrongAnswer}");
                 break;
@@ -201,17 +227,16 @@ public class ColoringController : MonoBehaviour
 
     int GenerateTrickyAnswer()
     {
-        // Генерируем "хитрые" ответы, которые могут сбить с толку
         int trickyType = Random.Range(0, 3);
 
         switch (trickyType)
         {
-            case 0: // Ответ от соседнего примера
+            case 0:
                 int neighbor1 = Random.Range(currentDifficultySettings.minNumber, currentDifficultySettings.maxNumber + 1);
                 int neighbor2 = Random.Range(currentDifficultySettings.minNumber, currentDifficultySettings.maxNumber + 1);
                 return neighbor1 * neighbor2;
 
-            case 1: // Перепутанные цифры (например, 24 вместо 42)
+            case 1:
                 string correctStr = correctAnswer.ToString();
                 if (correctStr.Length == 2)
                 {
@@ -223,32 +248,28 @@ public class ColoringController : MonoBehaviour
                     }
                     catch
                     {
-                        // Если что-то пошло не так, используем fallback
                         return correctAnswer + 1;
                     }
                 }
                 break;
 
-            case 2: // Сложение вместо умножения
+            case 2:
                 int a = correctAnswer / 10;
                 int b = correctAnswer % 10;
                 if (a > 0 && b > 0) return a + b;
                 break;
         }
 
-        // Fallback - обычный неправильный ответ
         return correctAnswer + Random.Range(-currentDifficultySettings.wrongAnswerRange,
                                           currentDifficultySettings.wrongAnswerRange + 1);
     }
 
     public void OnAnswerSelected(int buttonIndex, int selectedAnswer)
     {
-        // ЗАЩИТА ОТ МНОЖЕСТВЕННЫХ НАЖАТИЙ
         if (!isGameActive || isProcessingAnswer) return;
 
         isProcessingAnswer = true;
 
-        // ОСТАНАВЛИВАЕМ ПРЕДЫДУЩУЮ АНИМАЦИЮ
         if (currentAnimationCoroutine != null)
         {
             StopCoroutine(currentAnimationCoroutine);
@@ -256,7 +277,6 @@ public class ColoringController : MonoBehaviour
 
         if (selectedAnswer == correctAnswer)
         {
-            // Звуки правильного ответа
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX("ColoringCorrectAnswer");
@@ -268,7 +288,6 @@ public class ColoringController : MonoBehaviour
         }
         else
         {
-            // Звуки неправильного ответа
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX("ColoringWrongAnswer");
@@ -276,7 +295,6 @@ public class ColoringController : MonoBehaviour
 
             errorCount++;
 
-            // ЗАЩИЩЕННЫЙ ПАРСИНГ ВОПРОСА
             if (TryParseQuestion(questionText.text, out int num1, out int num2))
             {
                 adaptiveDifficulty.RecordMistake(num1, num2);
@@ -286,12 +304,9 @@ public class ColoringController : MonoBehaviour
         }
 
         currentQuestion++;
-
-        // ПРОВЕРЯЕМ УСЛОВИЯ ОКОНЧАНИЯ ИГРЫ С ЗАДЕРЖКОЙ
         StartCoroutine(CheckGameEndWithDelay());
     }
 
-    // ЗАЩИЩЕННЫЙ ПАРСИНГ ВОПРОСА
     private bool TryParseQuestion(string questionText, out int num1, out int num2)
     {
         num1 = 0;
@@ -320,10 +335,7 @@ public class ColoringController : MonoBehaviour
     IEnumerator ShowPartWithAnimation(int partIndex, bool isCorrect)
     {
         ShowPart(partIndex, isCorrect);
-
-        // ЖДЕМ ЗАВЕРШЕНИЯ АНИМАЦИИ ПЕРЕД РАЗБЛОКИРОВКОЙ
         yield return new WaitForSeconds(0.6f);
-
         isProcessingAnswer = false;
     }
 
@@ -368,14 +380,14 @@ public class ColoringController : MonoBehaviour
 
             partImage.color = transparentColor;
 
-            while (elapsed < duration && isGameActive) // ЗАЩИТА
+            while (elapsed < duration && isGameActive)
             {
                 partImage.color = Color.Lerp(transparentColor, originalColor, elapsed / duration);
                 elapsed += Time.deltaTime;
                 yield return null;
             }
 
-            if (isGameActive) // ЗАЩИТА
+            if (isGameActive)
             {
                 partImage.color = originalColor;
             }
@@ -384,7 +396,6 @@ public class ColoringController : MonoBehaviour
 
     IEnumerator CheckGameEndWithDelay()
     {
-        // КОРОТКАЯ ЗАДЕРЖКА ПЕРЕД ПРОВЕРКОЙ КОНЦА ИГРЫ
         yield return new WaitForSeconds(0.3f);
 
         if (errorCount >= maxErrors)
@@ -393,18 +404,17 @@ public class ColoringController : MonoBehaviour
         }
         else if (currentQuestion >= currentDifficultySettings.totalQuestions)
         {
-            // Определяем результат на основе количества ошибок
             if (errorCount == 0)
             {
-                Victory(true); // Идеально - 0 ошибок
+                Victory(true);
             }
             else if (errorCount <= 2)
             {
-                Victory(false); // Неплохо - 1-2 ошибки
+                Victory(false);
             }
             else
             {
-                Defeat(); // Поражение - 3-4 ошибки
+                Defeat();
             }
         }
         else
@@ -415,19 +425,16 @@ public class ColoringController : MonoBehaviour
 
     void Victory(bool isPerfect)
     {
-        if (!isGameActive) return; // ЗАЩИТА ОТ ПОВТОРНЫХ ВЫЗОВОВ
+        if (!isGameActive) return;
 
         isGameActive = false;
 
         SaveLevelProgress(isPerfect);
 
-        // Звуки победы
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayVictoryMusic();
             AudioManager.Instance.PlaySFX("DrawingComplete");
-
-            // Дополнительный звук для идеального результата
             if (isPerfect)
             {
                 AudioManager.Instance.PlaySFX("StarAppear");
@@ -441,7 +448,6 @@ public class ColoringController : MonoBehaviour
         }
         else
         {
-            // 1-2 ошибки
             victoryText.text = $"Неплохо!\nПравильных ответов: {correctAnswers}/{currentDifficultySettings.totalQuestions}";
         }
 
@@ -450,13 +456,12 @@ public class ColoringController : MonoBehaviour
 
     void Defeat()
     {
-        if (!isGameActive) return; // ЗАЩИТА ОТ ПОВТОРНЫХ ВЫЗОВОВ
+        if (!isGameActive) return;
 
         isGameActive = false;
 
         SaveLevelProgress(false);
 
-        // Звуки поражения
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayDefeatMusic();
@@ -467,12 +472,10 @@ public class ColoringController : MonoBehaviour
         {
             if (errorCount >= maxErrors)
             {
-                // Слишком много ошибок (maxErrors и больше)
                 defeatText.text = "Слишком много ошибок!\nПопробуй еще раз!";
             }
             else
             {
-                // 3-4 ошибки
                 defeatText.text = $"Почти получилось!\nПравильных ответов: {correctAnswers}/{currentDifficultySettings.totalQuestions}";
             }
         }
@@ -486,14 +489,10 @@ public class ColoringController : MonoBehaviour
         {
             int currentSlot = PlayerPrefs.GetInt("CurrentSaveSlot", 0);
 
-            // Сохраняем что уровень пройден
             string completedKey = $"Slot_{currentSlot}_{levelId}_completed";
             PlayerPrefs.SetInt(completedKey, 1);
 
-            // Расчет звезд
             int baseStars = isPerfect ? 3 : (correctAnswers >= currentDifficultySettings.totalQuestions * 0.7f ? 2 : 1);
-
-            // Бонус за высокий уровень сложности
             int difficultyBonus = (currentDifficultyLevel >= 5 && correctAnswers >= currentDifficultySettings.totalQuestions * 0.8f) ? 1 : 0;
             int totalStars = Mathf.Min(3, baseStars + difficultyBonus);
 
@@ -530,52 +529,37 @@ public class ColoringController : MonoBehaviour
         }
     }
 
-    // Кнопки UI
     public void RestartLevel()
     {
-        // Звук кнопки перезапуска
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
 
-        // ОСТАНАВЛИВАЕМ ВСЕ КОРУТИНЫ
         StopAllCoroutines();
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void BackToMenu()
     {
-        // Звук кнопки возврата
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
 
-        // ОСТАНАВЛИВАЕМ ВСЕ КОРУТИНЫ
         StopAllCoroutines();
-
         SceneManager.LoadScene(2);
     }
 
     public void LoadNextLevel()
     {
-        // Звук кнопки следующего уровня
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
 
         int currentLevel = progressiveLevelManager.ExtractLevelNumber(levelId);
         int nextLevel = currentLevel + 1;
 
-        if (nextLevel <= 4) // У вас 4 уровня раскраски
+        if (nextLevel <= 4)
         {
             string nextSceneName = $"ColoringLevel{nextLevel}";
             if (Application.CanStreamedLevelBeLoaded(nextSceneName))
             {
-                // ОСТАНАВЛИВАЕМ ВСЕ КОРУТИНЫ
                 StopAllCoroutines();
                 SceneManager.LoadScene(nextSceneName);
             }
@@ -590,26 +574,20 @@ public class ColoringController : MonoBehaviour
         }
     }
 
-    // Дополнительные методы для управления звуками
     public void PlayButtonSound()
     {
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonClick();
-        }
     }
 
     public void PlayHoverSound()
     {
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayButtonHover();
-        }
     }
 
     void OnDestroy()
     {
-        // ОЧИСТКА РЕСУРСОВ ПРИ ВЫГРУЗКЕ
         StopAllCoroutines();
     }
 }
