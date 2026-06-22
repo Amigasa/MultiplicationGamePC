@@ -56,16 +56,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Color/Coloring_Level_4.unity
     guid: 170e5f1e3c17f2840b015f3d82e76dbe
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Color/Coloring_Level_5.unity
-    guid: 6e177f5943697244eb1825ada3561ce9
-  - enabled: 0
+    guid: 15926130a8458fe4aaccbcb1210044f9
+  - enabled: 1
     path: Assets/Scenes/Color/Coloring_Level_6.unity
-    guid: 2f0935b0ba013ef48a57509ff299a6dc
-  - enabled: 0
+    guid: 925e252824f334947936270a20de458a
+  - enabled: 1
     path: Assets/Scenes/Color/Coloring_Level_7.unity
-    guid: ae9b891bddb2b214eafd3219e032bfaf
-  - enabled: 0
+    guid: 865d8b8035ab5724ca19b467c9b55351
+  - enabled: 1
     path: Assets/Scenes/Color/Coloring_Level_8.unity
-    guid: 257fa5608fe393146af5d7dc4503eee3
+    guid: 8efe5ebcadb9a534e8aec15c537a4a8b
   m_configObjects: {}

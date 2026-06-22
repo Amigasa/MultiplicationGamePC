@@ -64,21 +64,21 @@ public class SimpleSlotManager : MonoBehaviour
     public void DeleteSlot(int slotIndex)
     {
         // ”дал€ем все данные слота - Ѕ»“¬ј
-        for (int i = 1; i <= 17; i++)
+        for (int i = 1; i <= 8; i++)
         {
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Battle_Level_{i}_stars");
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Battle_Level_{i}_completed");
         }
 
         // ”дал€ем все данные слота - –ј— –ј— ј (ƒќЅј¬»“№)
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i <= 8; i++)
         {
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Coloring_Level_{i}_stars");
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Coloring_Level_{i}_completed");
         }
 
         // ”дал€ем все данные галереи (ƒќЅј¬»“№)
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i <= 8; i++)
         {
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Gallery_Level_{i}");
         }
@@ -138,14 +138,14 @@ public class SimpleSlotManager : MonoBehaviour
         int count = 0;
 
         // ”ровни битвы (17)
-        for (int i = 1; i <= 17; i++)
+        for (int i = 1; i <= 8; i++)
         {
             if (PlayerPrefs.GetInt($"Slot_{slotIndex}_Battle_Level_{i}_completed", 0) == 1)
                 count++;
         }
 
         // ”ровни раскраски (4) - ƒќЅј¬»“№
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i <= 8; i++)
         {
             if (PlayerPrefs.GetInt($"Slot_{slotIndex}_Coloring_Level_{i}_completed", 0) == 1)
                 count++;
@@ -160,13 +160,13 @@ public class SimpleSlotManager : MonoBehaviour
         int total = 0;
 
         // «везды уровней битвы
-        for (int i = 1; i <= 17; i++)
+        for (int i = 1; i <= 8; i++)
         {
             total += PlayerPrefs.GetInt($"Slot_{slotIndex}_Battle_Level_{i}_stars", 0);
         }
 
         // «везды уровней раскраски - ƒќЅј¬»“№
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i <= 8; i++)
         {
             total += PlayerPrefs.GetInt($"Slot_{slotIndex}_Coloring_Level_{i}_stars", 0);
         }
