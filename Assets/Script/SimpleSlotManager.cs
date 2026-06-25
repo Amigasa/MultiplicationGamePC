@@ -70,14 +70,14 @@ public class SimpleSlotManager : MonoBehaviour
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Battle_Level_{i}_completed");
         }
 
-        // Удаляем все данные слота - РАСКРАСКА (ДОБАВИТЬ)
+        // Удаляем все данные слота - РАСКРАСКА
         for (int i = 1; i <= 8; i++)
         {
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Coloring_Level_{i}_stars");
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Coloring_Level_{i}_completed");
         }
 
-        // Удаляем все данные галереи (ДОБАВИТЬ)
+        // Удаляем все данные галереи
         for (int i = 1; i <= 8; i++)
         {
             PlayerPrefs.DeleteKey($"Slot_{slotIndex}_Gallery_Level_{i}");
@@ -121,7 +121,7 @@ public class SimpleSlotManager : MonoBehaviour
             int totalStars = CountTotalStars(slotIndex);
 
             slotUI.slotNameText.text = slotName;
-            slotUI.progressText.text = $"Уровней: {completedLevels}/21\nЗвезд: {totalStars}/63"; // 17+4=21 уровней, 51+12=63 звезды
+            slotUI.progressText.text = $"Уровней: {completedLevels}/16\nЗвезд: {totalStars}/48";
             slotUI.deleteButton.SetActive(true);
         }
         else
@@ -132,19 +132,19 @@ public class SimpleSlotManager : MonoBehaviour
         }
     }
 
-    // Подсчет пройденных уровней (ОБНОВИТЬ)
+    // Подсчет пройденных уровней
     int CountCompletedLevels(int slotIndex)
     {
         int count = 0;
 
-        // Уровни битвы (17)
+        // Уровни битвы (8)
         for (int i = 1; i <= 8; i++)
         {
             if (PlayerPrefs.GetInt($"Slot_{slotIndex}_Battle_Level_{i}_completed", 0) == 1)
                 count++;
         }
 
-        // Уровни раскраски (4) - ДОБАВИТЬ
+        // Уровни раскраски (8) - ДОБАВИТЬ
         for (int i = 1; i <= 8; i++)
         {
             if (PlayerPrefs.GetInt($"Slot_{slotIndex}_Coloring_Level_{i}_completed", 0) == 1)
@@ -154,19 +154,19 @@ public class SimpleSlotManager : MonoBehaviour
         return count;
     }
 
-    // Подсчет общего количества звезд (ОБНОВИТЬ)
+    // Подсчет общего количества звезд
     int CountTotalStars(int slotIndex)
     {
         int total = 0;
 
         // Звезды уровней битвы
-        for (int i = 1; i <= 8; i++)
+        for (int i = 1; i <= 24; i++)
         {
             total += PlayerPrefs.GetInt($"Slot_{slotIndex}_Battle_Level_{i}_stars", 0);
         }
 
-        // Звезды уровней раскраски - ДОБАВИТЬ
-        for (int i = 1; i <= 8; i++)
+        // Звезды уровней раскраски
+        for (int i = 1; i <= 24; i++)
         {
             total += PlayerPrefs.GetInt($"Slot_{slotIndex}_Coloring_Level_{i}_stars", 0);
         }
